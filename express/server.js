@@ -26,16 +26,22 @@ var	  express = require('express'),
 module.exports = (()=>{
 	function inner(){
 		this.start = whatToDo=>{
-		// Вставлям middleware. Приорететное - сверху 
+		// Подключаем middleware. Приорететное - сверху 
+
 		// указываем движок шаблонизатора
 		app.engine('handlebars', handlebars.engine);
 		app.set('view engine','handlebars');
+
+		//подключаем парсер для POST запросов, используется в users
+		app.use(require('body-parser').urlencoded({"extended": true}));
+
 		// Наставляем Express на поиск статики в папке паблик
 		// Вся статика хранится в /public
 		// А юзеру доступна в корне
 		app.use(express.static(__dirname + '/public'))
 		   .use((req, res, next)=>next());
 
+		// объявляем GET маршрут для /api
 		app.get('/api', (req, res) => {
 			res.set({'Access-Control-Allow-Origin': '*', 'elias': 'goss'}); //CORS - outer reqs
 			res.json({'gossApi':'started ok!'});
@@ -106,7 +112,7 @@ module.exports = (()=>{
 		app.use((err,req,res,next) => {
 			res
 				.status(500)
-				.send('500 Server internal error');
+				.send(`500 Server internal\n<br>\nerror ${err}`);
 		})
 
 		app.set('port',  8001 )		  
