@@ -1,0 +1,13 @@
+{
+  "name": "raw-chat",
+  "version": "1.0.0",
+  "description": "Чат на сыром NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Armand Van Shader",
+  "license": "ISC"
+}

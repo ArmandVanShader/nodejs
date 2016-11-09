@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>Chat Form</title>
+   <meta charset="utf-8"><style>* {font-family:sans-serif} span {position:fixed; right:20px; top:10px;border:double; padding: 15px; border-radius:20px;}</style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script>
+     $(function(){
+	   //обсудим, чем плох setInterval в свете асинхронности	 
+	   //сделайте так, чтобы был setTimeout и только при включённом флажке "Обновлять"	 
+	   //приведите форму к красивому виду	 
+       var inter = setInterval(function(){  
+		    $.ajax({
+		        url: '/read',
+		        method: 'GET'
+		    })
+			.done( result => {
+           		$('div').html(result);
+         	});       
+       }, 1000); 
+       $('#b').on('click', function(){
+       		$.ajax({
+				url: '/add',
+				data: {"addMessage" : $('#i').val()},
+				method: 'GET'
+			})
+			.done( result => {
+                $('input').css({"background":"green"});
+                setTimeout(function(){  $('input').css({"background":"none"});  }, 3000);
+			});		 
+       });
+     })
+  </script>
+ </head>
+ <body>
+    <h1>Содержимое чата:</h1>
+    <div></div>
+    <span><h2>Введите реплику:</h2>
+      <input id="i"><button id="b">Написать!</button></span>
+ </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "hasher",
+  "version": "2.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "6.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "ArmandVanShader",
+  "license": "ISC",
+  "dependencies": {
+    "md5": "2.2.1",
+    "phantomjs": "^2.1.7",
+    "sha1": "1.1.1"
+  }
+}

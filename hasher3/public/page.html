@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Hasher</title>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="/cover.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand">Hasher 3.0</h3>
+              <nav>
+                <ul class="nav masthead-nav">
+                  <li class="active" id="md5" onclick="$('.active').removeClass('active'); $('#md5').addClass('active'); getHash($('#text').val()); event.preventDefault();"><a href="#">MD5</a></li>
+                  <li id="sha1"><a href="#"onclick="
+                    $('.active').removeClass('active');
+                    $('#sha1').addClass('active');
+                    getHash($('#text').val());
+                    event.preventDefault();
+                    ">SHA1</a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <div class="inner cover">
+            <h1 class="cover-heading">Hasher - новое слово в развлечениях</h1>
+            <p class="lead">Haser даёт бесконечные возможности по получению хэша любого текста. Попробуйте вести любой текст - и вы поймёте, как это классно!</p>
+            <p class="lead">
+              <input type="text" id="text" class="form-control" placeholder="Текст любой сюда введи, юный падаван" onkeyup="getHash($('#text').val())">
+            </p>
+            <p class="alert alert-success" id="result">Текст любой в поле выше введи, юный падаван</p>            
+          </div>
+
+          <div class="mastfoot">
+            <div class="inner">
+              <p>Классно, не правда ли?</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script type="text/javascript">
+function getHash(str) {
+  document.getElementById("result").style.display = "block";
+  var xhttp,hash;
+  if (str.length == 0) {
+    document.getElementById("result").innerHTML = "";
+    return;
+  }
+  xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("result").innerHTML = this.responseText;
+    } else {
+      $('#result').removeClass('alert-success');
+      $('#result').addClass('alert-warning');
+    }
+  };
+  if ($('#md5').hasClass('active')) {hash="md5";}
+  if ($('#sha1').hasClass('active')) {hash="sha1";}
+  xhttp.open("GET", "/api?src="+str+"&hash="+hash, true);
+  xhttp.send();
+}   
+
+
+    </script>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>">
+  </body>
+</html>

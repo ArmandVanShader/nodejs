@@ -1,0 +1,6 @@
+{"users":
+	[
+		{"login": "student", "pass": "student"},
+		{"login": "guest", "pass": "password"}
+	]
+}
