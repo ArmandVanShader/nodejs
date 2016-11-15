@@ -1,1 +1,2 @@
-{"users":[{"login":"student","pass":"student"},{"login":"guest","pass":"password"}]}
+{"users":[{"login":"student","pass":"student"},
+{"login":"guest","pass":"password"},{"login":"pupkin","pass":"qwerty"}]}

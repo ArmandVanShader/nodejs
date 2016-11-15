@@ -3,10 +3,15 @@
 // GET /users/:login
 
 let router = require('express').Router()
+		//подклюаем модуль path для небольшого хака с путями
 		,path = require('path')
+		// получаем путь к файлу с данными
 		,data = path.dirname(require.main.filename) + '/data/users.json'
+		//читаем данные из файла и переводим их в объект
     ,usersData = require(data)
+		//подключаем модуль для удобной записи в JSON файл
     ,jsonfile = require('jsonfile')
+		//подключаем модуль для удобного удаления из файла
     ,_ = require('lodash')
 
 router
@@ -14,12 +19,32 @@ router
 	.route('/')
 		// для GET
 		.get((req,res) => {
-			// рендерим шаблон users, передавая ему массив под именем users
-			res.render('users',{
-				"users": usersData.users
-			});
+			// если запрошен JSON
+			if (req.query.json !== undefined) {
+				// отсылаем JSON
+				res.send(JSON.stringify(usersData.users));
+			} else {
+				// смотрим, надо ли показывать формы добавления или 
+				if (req.query.add !== undefined) {
+					// рендерим шаблон users, передавая ему массив под именем users
+					// и элемент form-add, наличие которого проверяется в шаблоне
+					res.render('users',{
+						"users": usersData.users
+						,"form-add": true
+					});					
+				} else if (req.query.remove !== undefined) {
+					res.render('users',{
+						"users": usersData.users
+						,"form-remove": true
+					});					
+				} else {
+					res.render('users',{
+						"users": usersData.users
+					});								
+				}
+			}
 		})
-		//для
+		//для POST запросов
 		.post((req,res) => {
 			usersData.users.push(
 				{
@@ -29,7 +54,7 @@ router
 			);
 			jsonfile.writeFile(data,usersData, err=>{
 				if (err) throw(err);
-				res.send(`Был добавлен пользователь ${req.body.login} с паролем ${req.body.password}`)
+				res.send(`Был добавлен пользователь ${req.body.login} с паролем ${req.body.pass}`)
 			})
 		})
 router
@@ -41,10 +66,21 @@ router
 			});
 			jsonfile.writeFile(data,usersData, err=>{
 				if (err) throw(err);
-				res.send(`Был удалён пользователь ${req.body.login}`)
+				if (removed.length>0){
+					res.send(`Был удалён пользователь ${req.params.login}`);
+				} else {
+					res.send(`Ни одного пользователя с логином ${req.params.login} не найдено`);
+				}
 			})
 		})
 		.get((req,res) =>{
-			res.send('Ещё не доделано');
+			userFound = _.find(usersData.users, { 'login': req.params.login});
+			if (userFound !== undefined){
+				res.render('userDetails',{
+					"user": userFound
+				});
+			} else {
+				res.send(`<h1>Пользователь с логином ${req.params.login} не найден</h1>`);
+			}
 		})
 module.exports = router;
