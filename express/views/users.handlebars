@@ -8,10 +8,11 @@
    		border-radius: 10px;
    	}
 		.alert{
-			display: none;
+				display: none;
 		}
    </style>
 {{/section}}
+
 
 <div id="form-add" class="form row bg-success {{#if form-add}}{{else}}hidden{{/if}}
 ">
@@ -30,34 +31,40 @@
 		    </div>
 		  </div>
 		  <div class="form-group">
-		    <div class="col-sm-offset-2 col-sm-10">
+		    <div class="col-sm-offset-2 col-sm-5">
 		      <button id="form-add-button" type="button" class="btn btn-default">Добавить пользователя</button>
-		    </div>
-		  </div>
+		  	</div>
+	  	</div>
 		</form>
-		<div id="alert-add" class=" alert"></div>
 	</div>
+  <div class="col-sm-2 col-xs-12">
+  	<div id="alert-add" class="alert alert-success">Здесь будет текст уведомления</div>
+  </div>
 </div>
 
 <script type="text/javascript">
+// вешаем обработчик клика на кнопку
 $('#form-add-button').bind('click', function(){
+	// Если форма заполнена
 	if ($('#login').val()!=="" && $('#pass').val()!==""){
+		// отправляем AJAX запрос
 		$.ajax({
 		  type: "POST",
 		  url: "/users",
 		  data: $("#form-add form").serializeArray(),
-		  beforeSend: function () {
-		  	$('#form-add-button').prop('disabled',true);
-		  },
+		  // перед отправкой уведомляем
+		  beforeSend: notifyUser("alert-add","Ожидайте...","warning"),
+		  // при успешном завершении 
 		  success: function(msg){
-		    $("#alert-add")
-		    	.removeClass("alert-danger")
-		    	.addClass("alert-info")
-		    	.text(msg)
-		    	.slideDown(300);
+		  	// уведомляем
+		    notifyUser("alert-add",msg,"info")
+		    // очищаем форму
+		    $('#login').val('');
+		    $('#pass').val('');
 		  }
 		});
-	} else $("#alert-add").addClass("alert-danger").text("Не все поля заполнены!").slideDown(300)
+	// если форма не заполнена, уведомляем
+	} else notifyUser("alert-add","Не все поля заполнены!","danger")
 });
 </script>
 
@@ -82,31 +89,33 @@ $('#form-add-button').bind('click', function(){
 		    </div>
 		  </div>
 		</form>
-		<div id="alert-remove" class="alert"></div>
 	</div>
+  <div class="col-sm-2 col-xs-12">
+  	<div id="alert-remove" class="alert">Здесь будет текст уведомления</div>
+  </div>	
 </div>
 
 <script type="text/javascript">
+// вешаем обработчик на кнопку
 $('#form-remove-button').bind('click', function(){
-	var login = $("#remove-list :selected").val();
+	// получаем выбранное  значение из селекта
+	var login = $("#remove-list :selected").attr('val');
+	// если выбрано не значение по-умолчанию
 	if (login !=='null'){
+		// шлём AJAX запрос
 		$.ajax({
 		  type: "DELETE",
 		  url: "/users/"+login,
 		  data: "",
-		  beforeSend: function () {
-		  	$('#form-remove-button').prop('disabled',true);
-		  	$("#remove-list").prop('disabled',true);
-		  },
+		  // перед отправкой уведомляем
+		  beforeSend: notifyUser("alert-remove","Ожидайте...","warning"),
+		  // при успешном завершении уведомляем
 		  success: function(msg){
-		    $("#alert-remove")
-		    	.removeClass("alert-danger")
-		    	.addClass("alert-info")
-		    	.text(msg)
-		    	.slideDown(300);
+		    notifyUser("alert-remove",msg,"info")
 		  }
 		});
-	} else $("#alert-remove").addClass("alert-danger").text("Не выбран пользователь!").slideDown(300)
+	// если выбор не был сделан, уведомляем
+	} else notifyUser("alert-remove","Не выбран пользователь","danger")
 });
 </script>
 
@@ -115,7 +124,7 @@ $('#form-remove-button').bind('click', function(){
 	<h1>Все пользователи</h1>
 	<p class="lead">Здесь можно увидеть всех пользоателей из базы данных</p>
 	<div class="col-sm-6 col-sm-offset-3 col-xs-12">
-		<table class="table table-striped table-hover table-bordered ">
+		<table id="table" class="table table-striped table-hover table-bordered ">
 			<tr class="info">
 				<td>Логин</td>
 				<td>Пароль</td>
@@ -131,3 +140,72 @@ $('#form-remove-button').bind('click', function(){
 		</table>
 	</div>
 </div>
+
+<script src="/socket.io/socket.io.js"></script> 
+<script>
+	// объявляем функцию-помошник для удобных уведомлений
+	function notifyUser(alertId,notifText,notifType){
+		alertId='#'+alertId;
+		// если уведомление ещё не показано
+		$(alertId)
+			// убираем все класса
+			.removeClass()
+			// добавляем новые классы
+			.addClass(`alert alert-${notifType}`)
+			// меняем текст
+			.text(notifText)
+		if ($(alertId).css("display") !== 'block'){
+			// скрываем его
+			$(alertId).slideDown(300);
+		};
+	}
+
+	$(function(){
+		// инициализируем сокеты
+	 	var socket = io();
+	 	// при происхождении события userListUpdated
+	  socket.on('userListUpdated', function(data){
+	  	// очищаем таблицу с пользователями
+	  	$('#table').empty();
+	  	// формируем новый код таблицы
+	  	var rows=`
+		  	<table id="table" class="table table-striped table-hover table-bordered">
+					<tr class="info">
+						<td>Логин</td>
+						<td>Пароль</td>
+						<td>Прочее</td>
+					</tr>
+			`;
+			// парсим пришеший JSON
+			var userList = $.parseJSON(data);
+			// для каждого юзера
+	    $.each(userList, function(index, currentUser) {
+	    	// добавляем строку в таблицу
+		    rows += `
+					<tr>
+						<td>${currentUser.login}</td>
+						<td>${currentUser.pass}</td>
+						<td><a href="/users/${currentUser.login}">Подробности...</a></td>
+					</tr>
+		    `;
+			});		  
+		  rows += '</table>';
+		  // заменяем содержимое таблицы
+	    $('#table').replaceWith(rows);
+	    // если есть форма удаления...
+	    // если запрошена форма удаления, handlebars отрендерит в условие true
+	    // иначе будет пустая строка и условие не сработает
+			if ('{{form-remove}}'){
+				// ... очищаем список юзеров
+				$('#remove-list').empty();
+				// дописываем в начало дефолтное значение
+	    	$('#remove-list').prepend(`<option val="null" disabled selected>Выберите пользователя...</option>`);
+	    	// для каждого юзера
+		    $.each(userList, function(index, currentUser) {
+		    	// добавляем в конец списка очередную строкуу
+				  $('#remove-list').append(`<option val="${currentUser.login}">${currentUser.login}</option>`);
+				});
+			}
+	  });       
+	});
+</script>
